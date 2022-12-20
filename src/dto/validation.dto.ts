@@ -1,12 +1,9 @@
-import {IsNotEmpty, IsString, ValidateNested} from "class-validator";
+import {IsNotEmpty, IsOptional, IsString, ValidateNested} from "class-validator";
 import {Type} from "class-transformer";
-class ChildrenDto2 {
+class OtherObject {
     @IsString()
     @IsNotEmpty()
-    name: string;
-    @IsString()
-    @IsNotEmpty()
-    age: string;
+    value: string;
 }
 class ChildrenDto {
     @IsString()
@@ -16,12 +13,9 @@ class ChildrenDto {
     @IsNotEmpty()
     age: string;
     @Type(() => ChildrenDto)
-    @IsNotEmpty()
-    @ValidateNested( {each: true})
-    children:ChildrenDto2
-
-
-
+    @IsOptional()
+    @ValidateNested( {each: false})
+    object:OtherObject
 }
 
 class  ValidationDto {
@@ -30,10 +24,9 @@ class  ValidationDto {
     name: string;
     @Type(() => ChildrenDto)
     @IsNotEmpty()
-    @ValidateNested( {each: true})
+    @ValidateNested( {each: false})
 
     children:ChildrenDto;
-
 }
 
 
