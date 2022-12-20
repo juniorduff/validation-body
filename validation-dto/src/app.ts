@@ -1,25 +1,42 @@
-import {urlencoded,json} from 'body-parser';
 import "reflect-metadata";
-import { Container } from 'inversify';
-import {   InversifyExpressServer} from 'inversify-express-utils';
 
-// declare metadata by @controller annotation
-import "./controllers/foo_controller";
+import bodyParser from "body-parser";
+import { Container } from "inversify";
+import * as prettyjson from "prettyjson";
+import { getRouteInfo, InversifyExpressServer } from "inversify-express-utils";
 
-// set up container
+import "./validation.controller";
+import {NextFunction , Request, Response} from "express";
+import {BodyValidation} from "./errors/body-validation";
+
 let container = new Container();
-
-// set up bindings
-
-// create server
 let server = new InversifyExpressServer(container);
 server.setConfig((app) => {
   // add body parser
-  app.use( urlencoded({
-    extended: true
-  }));
-  app.use(json());
+  app.use(
+    bodyParser.urlencoded({
+      extended: true,
+    })
+  );
+  app.use(bodyParser.json());
+
+    app.use(
+        (err: Error, request: Request, response: Response, next: NextFunction) => {
+            if (err instanceof BodyValidation) {
+                console.log(err)
+                return response.status(400).json({ message: err.message });
+            }
+            return response.status(500).json({
+                status: "error",
+                message: `Internal server error - ${err.message}`,
+            });
+        }
+    );
 });
 
 let app = server.build();
+
+
+const routeInfo = getRouteInfo(container);
+console.log(prettyjson.render(routeInfo));
 app.listen(3000);

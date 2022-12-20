@@ -2,7 +2,6 @@ import { sanitize } from 'class-sanitizer';
 import { plainToInstance } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
 import { NextFunction, Request, Response } from 'express';
-import { BodyValidation } from '../errors/body-validation';
 /**
  * @author Valmir junior and Jardesson Eduardo <valmir.junior@mblabs.com.br>
  */
@@ -27,9 +26,10 @@ const goThroughBreadth = (node: ValidationError ) => {
   return explored.map((item) => Object.values(item.constraints)[0]);
   };
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   export function validateBodyRequest(type: any, skipMissingProperties = false) {
-    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+
+    return async (req: Request, res: Response, next: NextFunction): Promise<Response | NextFunction | void> => {
+
       const dtoObj = plainToInstance(type, req.body);
       const errors = await validate(dtoObj, { skipMissingProperties });
 
@@ -38,10 +38,12 @@ const goThroughBreadth = (node: ValidationError ) => {
         for (const error of errors) {
           dtoErrors = dtoErrors.concat(goThroughBreadth(error));
         }
+        return res.status(400).json({
+            message: 'Validation failed',
+            errors: dtoErrors,
+        });
 
-        return next(new BodyValidation(dtoErrors));
-      }
-
+        }
       sanitize(dtoObj);
       req.body = dtoObj;
       return next();
