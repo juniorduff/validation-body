@@ -22,7 +22,9 @@ const goThroughBreadth = (node: ValidationError ) => {
       }
     }
 
-  // @ts-ignore
+
+    if(!explored[0].constraints) return;
+    // @ts-ignore
   return explored.map((item) => Object.values(item.constraints)[0]);
   };
 
@@ -32,15 +34,15 @@ const goThroughBreadth = (node: ValidationError ) => {
 
       const dtoObj = plainToInstance(type, req.body);
       const errors = await validate(dtoObj, { skipMissingProperties });
-
-      if (errors.length) {
+      console.log("errors",errors);
+      if (errors.length && errors[0].constraints) {
         let dtoErrors: string[] = [];
         for (const error of errors) {
           dtoErrors = dtoErrors.concat(goThroughBreadth(error));
         }
         return res.status(400).json({
-            message: 'Validation failed',
-            errors: dtoErrors,
+            message: 'invalid Body',
+            errors: dtoErrors.filter(error => error !== undefined && error !== null),
         });
 
         }
