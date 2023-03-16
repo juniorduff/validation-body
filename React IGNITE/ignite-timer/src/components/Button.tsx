@@ -1,8 +1,6 @@
-
-
 export function Button() {
   return (
-    <button className="button">
+    <button className='button'>
       <span>Button</span>
     </button>
   )
