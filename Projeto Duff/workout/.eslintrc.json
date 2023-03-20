@@ -1,7 +1,0 @@
-{
-    "extends": "@rocketseat/eslint-config/react",
-    "rules": {
-        "prettier/prettier": "off",
-        "import/prefer-default-export": "off"
-    }
-}
